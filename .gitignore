@@ -1,0 +1,32 @@
+# Compiled source #
+###################
+*.class
+*.dll
+*.exe
+*.o
+*.so
+*.doctree
+*.pickle
+*.swn
+*.swm
+*.swp
+*.pyc
+*.pyo
+*.swo
+local_settings.*
+*.sqlite
+old*
+temp*
+bak*
+r.*
+r?.*
+r??.*
+fabfile_settings.py
+.DS_Store
+tt
+ttp
+*.log
+t1
+.permset
+# doc/build/*
+
