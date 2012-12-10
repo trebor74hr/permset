@@ -3,6 +3,11 @@ import os, sys, sqlite3
 from unittest import TestCase, main
 from pprint import pprint as pp
 
+try:
+    import permset as dummy
+except ImportError:
+    sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+
 from permset import Permset, process
 
 class TestBasic(TestCase):
