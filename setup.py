@@ -3,7 +3,7 @@
 from distutils.core import setup
 from codecs import open
 
-long_description = open("README", "r", "utf-8").read().encode("utf-8")
+long_description = open("README.md", "r", "utf-8").read().encode("utf-8")
 
 # NOTE: all additional files for distro is in MANIFEST.in
 #       for files that need to be installed, see:
