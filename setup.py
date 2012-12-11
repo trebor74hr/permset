@@ -11,7 +11,7 @@ long_description = open("README", "r", "utf-8").read().encode("utf-8")
 
 setup(
     name='permset',
-    version='0.18',
+    version='0.19',
     packages = ["permset"],
     description = "Simple utility to manage \*nix permissions on file and directory trees based on patterns.",
     author = "Robert Lujo",
