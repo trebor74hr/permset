@@ -1,8 +1,37 @@
 permset
 =======
 
-Simple utility to manage \*nix permissions on file and directory trees based
+Simple standalone utility script to manage \*nix permissions on file and directory trees based
 on patterns.
+
+Installation
+------------
+### Easiest:
+    
+    pip install permset
+
+### Standard python distutils
+ * download latest release from http://pypi.python.org/pypi/permset
+ * unpack
+ * go to folder
+ * python setup.py install
+
+### Standalone script
+Download, rename and make executable (in some PATH folder, e.g. ~/bin):
+
+    wget https://raw.github.com/trebor74hr/permset/master/permset/base.py
+    mv base.py permset
+    chmod u+x permset
+
+Try:
+
+    ./permset
+
+Requirements
+------------
+
+* \*nix (linux, osx, bsd, unix ...).
+* Python 2.6+ (json module used).
 
 
 Usage
@@ -65,15 +94,6 @@ dirs!=files
 recursive, local, single
 formula
 
-Requirements
-------------
-Python 2.6+ (json module used)
-
-Installation
-------------
-python way - distutils, pip etc.
-
-\*nix style way - copy, remove suffix and make executable: chmod u+x permset
 
 Development
 -----------
@@ -83,4 +103,5 @@ Issue reporting
 
 Licence and disclaimer
 ----------------------
-
+Licence and disclaimer in [LICENCE]
+(https://github.com/trebor74hr/permset/blob/master/LICENCE) file.

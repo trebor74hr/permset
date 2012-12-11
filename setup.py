@@ -13,7 +13,7 @@ setup(
     name='permset',
     version='0.19',
     packages = ["permset"],
-    description = "Simple utility to manage \*nix permissions on file and directory trees based on patterns.",
+    description = "Simple standalone utility script to manage \*nix permissions on file and directory trees based on patterns.",
     author = "Robert Lujo",
     author_email = "trebor74hr@gmail.com",
     url = "https://github.com/trebor74hr/permset",
