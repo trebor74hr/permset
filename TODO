@@ -1,10 +1,14 @@
 TODO
-    - fix algorithm for 
-        - ~/env/it/src$ .git is not good
-    - push to pypi
-    - publish public
+    - convert to rst to match pypi and github - README.rst
     - skip paths
         - put them in global or local ignore list
         - nesting with .permset
         - skipping with: touch .permset.skip
     - print out stats - how many files -> how many patterns and for dirs too
+
+DONE
+    - fix algorithm for 
+        - ~/env/it/src$ .git is not good
+    - push to pypi
+    - publish public
+    - write session example, installation and other things in readme
