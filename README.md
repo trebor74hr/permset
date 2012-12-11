@@ -73,15 +73,15 @@ Some django project:
 
     user @ ~/env/proj/src/python/proj$ permset
     - - -  -------------------- ----------------------------------------
-    F P R rlujo|staff|rw-r--r-- .
-    F P R rlujo|admin|rw-r--r-- ./sites
-    F S - rlujo|admin|rw------- ./sites/person/local_settings.py
-    F S - rlujo|admin|rw------- ./sites/person/local_settings.pyc
-    F S - rlujo|admin|rw------- ./sites/company/local_settings.py
-    F S - rlujo|admin|rw------- ./sites/company/local_settings.pyc
+    F P R user1|staff|rw-r--r-- .
+    F P R user1|admin|rw-r--r-- ./sites
+    F S - user1|admin|rw------- ./sites/person/local_settings.py
+    F S - user1|admin|rw------- ./sites/person/local_settings.pyc
+    F S - user1|admin|rw------- ./sites/company/local_settings.py
+    F S - user1|admin|rw------- ./sites/company/local_settings.pyc
     - - -  -------------------- ----------------------------------------
-    D P R rlujo|staff|rwxr-xr-x .
-    D P R rlujo|admin|rwxr-xr-x ./sites
+    D P R user1|staff|rwxr-xr-x .
+    D P R user1|admin|rwxr-xr-x ./sites
 
     Call the script with --save option to save permission patterns.
 
@@ -116,28 +116,28 @@ See details:
     Permission differs from ./.permset setup.
     Setup saved in ./.permset:
     - - -  -------------------- ----------------------------------------
-    F P R rlujo|staff|rw-r--r-- .
-    F P R rlujo|admin|rw-r--r-- ./sites
-    F S - rlujo|admin|rw------- ./sites/person/local_settings.py
-    F S - rlujo|admin|rw------- ./sites/person/local_settings.pyc
-    F S - rlujo|admin|rw------- ./sites/company/local_settings.py
-    F S - rlujo|admin|rw------- ./sites/company/local_settings.pyc
+    F P R user1|staff|rw-r--r-- .
+    F P R user1|admin|rw-r--r-- ./sites
+    F S - user1|admin|rw------- ./sites/person/local_settings.py
+    F S - user1|admin|rw------- ./sites/person/local_settings.pyc
+    F S - user1|admin|rw------- ./sites/company/local_settings.py
+    F S - user1|admin|rw------- ./sites/company/local_settings.pyc
     - - -  -------------------- ----------------------------------------
-    D P R rlujo|staff|rwxr-xr-x .
-    D P R rlujo|admin|rwxr-xr-x ./sites
+    D P R user1|staff|rwxr-xr-x .
+    D P R user1|admin|rwxr-xr-x ./sites
 
     Directory's current permission patterns:
     - - -  -------------------- ----------------------------------------
-    F P R rlujo|staff|rw-r--r-- .
-    F S - rlujo|staff|rwxr--r-- ./r.log
-    F P R rlujo|admin|rw-r--r-- ./sites
-    F S - rlujo|admin|rw------- ./sites/person/local_settings.py
-    F S - rlujo|admin|rw------- ./sites/person/local_settings.pyc
-    F S - rlujo|admin|rw------- ./sites/company/local_settings.py
-    F S - rlujo|admin|rw------- ./sites/company/local_settings.pyc
+    F P R user1|staff|rw-r--r-- .
+    F S - user1|staff|rwxr--r-- ./r.log
+    F P R user1|admin|rw-r--r-- ./sites
+    F S - user1|admin|rw------- ./sites/person/local_settings.py
+    F S - user1|admin|rw------- ./sites/person/local_settings.pyc
+    F S - user1|admin|rw------- ./sites/company/local_settings.py
+    F S - user1|admin|rw------- ./sites/company/local_settings.pyc
     - - -  -------------------- ----------------------------------------
-    D P R rlujo|staff|rwxr-xr-x .
-    D P R rlujo|admin|rwxr-xr-x ./sites
+    D P R user1|staff|rwxr-xr-x .
+    D P R user1|admin|rwxr-xr-x ./sites
 
 
     === Number of patterns differs (9!=10)
@@ -153,17 +153,17 @@ Set all files permissions to match patterns:
     Permission differs from ./.permset setup.
     === Number of patterns differs (9!=10)
     === Following commands needs to be executed to apply saved patterns:
-    chown -h rlujo                     $(find . -type f)
+    chown -h user1                     $(find . -type f)
     chgrp -h staff                     $(find . -type f)
     chmod -h u+rw,u-x,g+r,g-wx,o+r,o-wx $(find . -type f)
     ...
-    chown -h rlujo                     $(find . -type d)
+    chown -h user1                     $(find . -type d)
     chgrp -h staff                     $(find . -type d)
     chmod -h u+rwx,g+rx,g-w,o+rx,o-w   $(find . -type d)
     ...
     chmod -h u+rwx,g+rx,g-w,o+rx,o-w   $(find ./sites -type d)
     === Do you want to continue (y/n)? y
-     chown -h rlujo                     $(find . -type f)
+     chown -h user1                     $(find . -type f)
      ...
      chmod -h u+rwx,g+rx,g-w,o+rx,o-w   $(find ./sites -type d)
     === Done
