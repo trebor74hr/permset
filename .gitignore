@@ -29,4 +29,6 @@ ttp
 t1
 .permset
 # doc/build/*
-
+build
+dist
+MANIFEST
