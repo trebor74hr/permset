@@ -12,7 +12,6 @@ Usage:
 
     permset [options] [<dir>]
 
-
 ### Arguments:
 
 * when <dir> is not specified, current folder is used (.)
@@ -57,4 +56,31 @@ Pattern codes by columns:
 
 Example session
 ---------------
+TODO
+
+Logic behind patterns
+---------------------
+TODO
+dirs!=files
+recursive, local, single
+formula
+
+Requirements
+------------
+Python 2.6+ (json module used)
+
+Installation
+------------
+python way - distutils, pip etc.
+
+\*nix style way - copy, remove suffix and make executable: chmod u+x permset
+
+Development
+-----------
+
+Issue reporting
+---------------
+
+Licence and disclaimer
+----------------------
 

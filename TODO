@@ -1,6 +1,8 @@
 TODO
     - fix algorithm for 
         - ~/env/it/src$ .git is not good
+    - push to pypi
+    - publish public
     - skip paths
         - put them in global or local ignore list
         - nesting with .permset
