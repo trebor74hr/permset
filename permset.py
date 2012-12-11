@@ -1,11 +1,5 @@
 #!/usr/bin/env python
 # coding:utf-8
-# NOTE: umask in bitwise mode works opposite as expected - what is denied
-# NOTE: chmod for dir sets x but not for files, X is special that can solve
-#       this
-
-# TODO:
-#   - save on pip
 
 import os, sys, sqlite3
 import pwd, grp, stat 
@@ -15,6 +9,9 @@ from optparse import OptionParser
 from codecs import open
 
 # ------------------
+# Utils
+# ------------------
+
 def ask_user_yes_no(title):
     while True:
         ans = raw_input(title+" (y/n)? ")
@@ -23,7 +20,10 @@ def ask_user_yes_no(title):
             break
     return ans
 
+# ------------------
+
 def get_perm(name):
+    """ inspired by stackoverflow answer on the similar problem """
     stat_info = os.lstat(name)
     mode = stat_info.st_mode
 
@@ -59,9 +59,13 @@ def to_unicode(s, force=False):
     return s
 
 # -------------
+# consts
+# -------------
 
 PERMSET_FILE = ".permset"
 
+# -------------
+# Permset - main class 
 # -------------
 
 class Permset(object):
@@ -140,21 +144,24 @@ class Permset(object):
         return cnt_main, cnt_all, mark_main, ratio
 
     def calculate_pattern(self, type, depth=0, root=None, parent_recursive_pattern=None):
-        """ Logika: prvo dohvati logiku samo trenutnog foldera 
-           - ako ima pattern 
-               - provjeri pattern za sve select rekurzivno
-               - ako je ok rekurzivno 
-                   - zapiši pravilo - rekurzivno
-                   - zovi rekurzivno s tim parametrom
-               - ako nije ok rekurzivno - zovi bez ponude
-                   - zapiši pravilo - nije rekurzivno
-                   - zovi rekurzivno s bez tog parametra
-           - provjeri lokalno 
-               - ako nema pattern - svi su exception
-               - ako ima pattern - samo različiti su exception
+        """ Algorithm - obsolete: 
+           guess pattern of current dir
+           if there is a pattern (more than 66% are have perms)
+             - check if the same pattern is recursive
+             - if it is recursive
+                 - save as an recursive pattern 
+                 - call recursivelly for all child dirs with the pattern as
+                   input arg
+             - if the pattern is not recursive
+                 - write a local dir pattern
+                 - call recursivelly for all child dirs with no recursive
+                   pattern as arg
+           check rest of files in dirs
+             - if dir has pattern and pattern is appliable - do nothing
+             - other cases - write single entry "pattern"
         """
         type=str(type)
-        is_pattern = False
+        is_recursive_pattern = False
         if root is None:
             root = "."
             for item in self.patterns:
@@ -166,18 +173,24 @@ class Permset(object):
 
         cnt_main1, cnt_all1, mark_main1, ratio1 = self.get_best_mark(root_term, 
                                                     type, depth=depth)
+        cnt_main2, cnt_all2, mark_main2, ratio2 = self.get_best_mark(root_term, 
+                                                    type, depth=None)
         local_pattern = None
-        if mark_main1 and ratio1 >= minimum:
-            local_pattern = mark_main1
-            cnt_main2, cnt_all2, mark_main2, ratio2 = self.get_best_mark(root_term, 
-                                                        type, depth=None)
-            if mark_main2==mark_main1 and ratio2 >= minimum:
-                if parent_recursive_pattern!=mark_main2:
-                    patterns.append((type, "P", "R", mark_main2, root, depth, [cnt_main1, cnt_all1], [cnt_main2, cnt_all2]))
-                    is_pattern = True
+
+        if mark_main2 and ratio2 >= minimum:
+            local_pattern = mark_main2
+            if parent_recursive_pattern!=mark_main2:
+                patterns.append((type, "P", "R", mark_main2, root, depth, 
+                    [cnt_main1, cnt_all1] if ratio1>=minimum else None, 
+                    [cnt_main2, cnt_all2]))
                 parent_recursive_pattern=mark_main2
-            else:
-                patterns.append((type, "P", "L", mark_main1, root, depth, [cnt_main1, cnt_all1], None))
+            elif parent_recursive_pattern:
+                assert parent_recursive_pattern==mark_main2
+            is_recursive_pattern = True
+
+        if mark_main1 and (local_pattern is None or mark_main1!=mark_main2) and ratio1 >= minimum:
+            local_pattern = mark_main1
+            patterns.append((type, "P", "L", mark_main1, root, depth, [cnt_main1, cnt_all1], None))
 
         cur = self.con.cursor()
         cur.execute("""select mark, name, type from perm 
@@ -191,21 +204,24 @@ class Permset(object):
                             local_pattern and mark==local_pattern)
             if type_this=="D":
                 parent_pattern = parent_recursive_pattern
-                dummy, became_pattern = self.calculate_pattern(type, depth+1, name, 
-                    parent_pattern)
-                if is_exception and became_pattern:
+                dummy, became_recursive_pattern = self.calculate_pattern(type, depth+1, name, 
+                                                    parent_pattern)
+                if is_exception and became_recursive_pattern:
                     is_exception = False
 
             if is_exception:
                 patterns.append((type, "S", None, mark, name, depth, None, None))
 
-        return patterns, is_pattern
+        return patterns, is_recursive_pattern
 
     def calculate_patterns_all(self):
         self.patterns = []
         self.calculate_pattern("F")
         self.calculate_pattern("D")
         return self.patterns
+
+    # list of class and static methods - I was in the static/class method's
+    # moode :)
 
     @classmethod
     def get_diff(cls, patterns, patterns_saved):
@@ -267,7 +283,7 @@ class Permset(object):
 
     @classmethod
     def get_apply_pattern_command(cls, patt):
-        """ using find is inspired by:
+        """ using find in ch* commands is inspired by:
             http://serverfault.com/questions/104804/chmod-applying-different-permissions-for-files-vs-directories
         """
         cmds = []
@@ -337,6 +353,8 @@ def print_usage(parser, m):
 # -------------
 
 def process(argv):
+    """ main program """
+
     parser = OptionParser(usage="""Usage: %prog [options] [<dir>]
 
 Simple utility to manage *nix permissions on file and directory trees based
@@ -404,9 +422,10 @@ Pattern codes by columns:
     if not permset.fill_db(root_dir):
         return False
 
-    # NOTE: for testing
+    # NOTE: nice when testing
     #   permset.dump_db("dump.sql")
     #   permset.load_db("dump.sql")
+
     patterns = permset.calculate_patterns_all()
 
     if options.save:
@@ -418,6 +437,9 @@ Pattern codes by columns:
         if os.path.exists(output):
             patterns_saved = permset.load_patterns_saved(output)
             diff = permset.get_diff(patterns, patterns_saved)
+            if options.set:
+                cmds = permset.get_apply_patterns_commands(patterns_saved)
+
             if diff:
                 print("Permission differs from %s setup." % output)
                 if options.verbose:
@@ -426,13 +448,11 @@ Pattern codes by columns:
                     print("\nDirectory's current permission patterns:")
                     permset.pp_patterns(patterns)
                     print("\n")
-                print(u"==="+diff)
+                print(u"=== "+diff)
                 if options.set:
-                    cmds = []
                     # TODO: put in function
                     if not permset.check_before_set(patterns_saved):
                         return False
-                    cmds.extend(permset.get_apply_patterns_commands(patterns_saved))
                     print("=== Following commands needs to be executed to apply saved patterns:")
                     print "\n".join(cmds)
                     if not ask_user_yes_no("=== Do you want to continue"):
@@ -443,17 +463,23 @@ Pattern codes by columns:
                             print(" %s" % cmd)
                             os.system(cmd)
                         except Exception, e:
-                            if not ask_user_yes_no("== Error:%s\n== Do you want to continue" % (e, )):
+                            if not ask_user_yes_no("=== Error:%s\n=== Do you want to continue" % (e, )):
                                 return False
-                    print("== Done")
+                    print("=== Done")
                 else:
                     print("\nCall the script with:\n - option --set - to reset everything to saved setup, or with\n - option --save - to overwrite setup with current permission patterns\n - option --verbose - to see details")
             else:
                 if options.verbose:
                     print("Setup:")
                     permset.pp_patterns(patterns_saved)
-                    print("====")
+                    print("===")
+                    if options.set:
+                        print("=== Following commands can be used to apply patterns:")
+                        print "\n".join(cmds)
+                        print("===")
+
                 if options.set:
+
                     print("Permission setup '%s' matched, nothing to set." % output)
                 else:
                     print("Permission setup '%s' matched." % output)
@@ -471,6 +497,9 @@ if __name__=="__main__":
 
 
 # obsolete:
+# NOTE: umask in bitwise mode works opposite as expected - what is denied
+# NOTE: chmod for dir sets x but not for files, X is special that can solve
+#       this
 
 # def has_perm(name):
 #     try:

@@ -3,10 +3,11 @@ import os, sys, sqlite3
 from unittest import TestCase, main
 from pprint import pprint as pp
 
+this_path = os.path.dirname(__file__)
 try:
     import permset as dummy
 except ImportError:
-    sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+    sys.path.append(os.path.join(this_path, ".."))
 
 from permset import Permset, process
 
@@ -14,10 +15,11 @@ class TestBasic(TestCase):
     def setUp(self):
         # permset.dump_db(con, "dump.sql")
         self.permset = Permset()
-        self.permset.load_db("testset-1.sql")
+        self.permset.load_db(os.path.join(this_path, "testset-1.sql"))
 
     def tearDown(self):
         for fname in ("dump.sql", "r.txt", ".permset"):
+            fname = os.path.join(this_path, fname)
             if os.path.exists(fname):
                 os.remove(fname)
 
@@ -70,6 +72,7 @@ class TestBasic(TestCase):
         # recursively
         self.permset.patterns = []
         patterns = self.permset.calculate_pattern("D")[0]
+        pp(patterns)
         self.pp_patterns(patterns, 
             [
               ('D', 'P', 'R', 'rlujo|staff|rwxr-xr-x', '.', 0)
@@ -88,14 +91,14 @@ class TestBasic(TestCase):
 
     def test_cmd_get(self):
         # dummy to test call
-        process([])
-        process(["--save"])
-        process(["--set"])
-        process(["--output", "r.txt"])
-        process(["."])
-        process([".", "--save"])
-        process([".", "--set"])
-        process([".", "--output", "r.txt"])
+        # process([])
+        # process(["--save", this_path])
+        # process(["--set", this_path])
+        # process(["--output", "r.txt", this_path])
+        process([this_path])
+        process([this_path, "--save"])
+        process([this_path, "--set"])
+        process([this_path, "--output", "r.txt"])
 
 if __name__=="__main__":
     main()
