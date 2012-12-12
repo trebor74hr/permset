@@ -6,17 +6,30 @@ on patterns.
 
 Installation
 ------------
-Easiest:
-    
+for admins - as a standalone script - go to some PATH visible dir and do:
+
+    wget https://raw.github.com/trebor74hr/permset/master/permset/base.py -O permset && chmod u+x permset
+
+for developers/devops/other - as a python package using [pip](http://www.pip-installer.org/en/latest/):
+
     pip install permset
 
-or as a standalone script:
+try it out:
 
-    wget https://raw.github.com/trebor74hr/permset/master/permset/base.py
-    mv base.py permset
-    chmod u+x permset
+    permset
 
 More details about installation options at the end of the page.
+
+*Us it on your own risk - this sw is still in alpha stage*. 
+
+Licence and disclaimer in [LICENCE](https://github.com/trebor74hr/permset/blob/master/LICENCE) 
+file.
+
+Requirements
+------------
+
+* \*nix (linux, osx, bsd, unix ...).
+* Python 2.6+ (json module used).
 
 Usage
 -----
@@ -139,7 +152,6 @@ See details:
     D P R user1|staff|rwxr-xr-x .
     D P R user1|admin|rwxr-xr-x ./sites
 
-
     === Number of patterns differs (9!=10)
 
     Call the script with:
@@ -179,12 +191,30 @@ Logic behind patterns
 Shortly:
 
  * files and directory permissions are processed separately - due different x interpretation
- * patterns are searched - recursively (R) and local for the current folder
-   (L). For the files that don't match patterns special entry for that file as
-   added as pattern (S).
+ * patterns are searched for - recursively (R) and locally - current folder only
+   (L). For the files/dirs that don't match current pattern - one special pattern entry for that file/dir is added (S).
  * patterns forumula: if more than 2/3 of files or directories have the same
-   mark (user/group/permissions) that will become pattern.
+   mark (user/group/permissions) that will become pattern
+
+File .permset
+------------------
+File .permset contains saved patterns as list of lists in JSON format:
+
+    [
+     ["F", "P", "R", "user1|staff|rw-r--r--", ".", 0, [6, 7], [74, 101]]
+    ,["F", "S", null, "user1|staff|rwxr--r--", "./permset", 0, null, null]
+    ...
+    ,["D", "P", "R", "user1|staff|rwxr-xr-x", ".", 0, [4, 5], [11, 14]]
+    ,["D", "P", "R", "user1|admin|rwxr-xr-x", "./sites", 1, [2, 2], [2, 2]]
+    ]
  
+The file can be easily manually edited, as long as it is valid JSON format with valid permset options.
+
+Internals and potential performance issues
+---------------------------------------------------
+The script is based on simple logic, done in [python](http://www.python.org/) programing language, internally uses python builtin [json](http://json.org/) parser and python's builtin [sqlite](https://sqlite.org/) db engine (as in-memory db). 
+
+The script intended usage is for small to medium sized directory trees. For large ones the script probably won't perform well.
 
 Development
 -----------
@@ -221,9 +251,7 @@ Try:
 
     ./permset
 
-Requirements
-------------
-
-* \*nix (linux, osx, bsd, unix ...).
-* Python 2.6+ (json module used).
-
+Contact
+-------
+If you want to contact author - mail can be found in 
+[LICENCE](https://github.com/trebor74hr/permset/blob/master/LICENCE) file.
