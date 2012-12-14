@@ -70,6 +70,8 @@ def to_unicode(s, force=False):
 # -------------
 
 PERMSET_FILE = ".permset"
+HOME = os.path.expanduser("~")
+PERMSET_CONFIG_FILE = os.path.join(HOME, ".permset.config")
 
 # -------------
 # Permset - main class 
@@ -109,6 +111,7 @@ class Permset(object):
                         return False
                     name_abs = to_unicode(os.path.abspath(os.path.join(root, name)))
                     insert_it(name_abs, type)
+        self.con.commit()
         cur.execute("create index idx_perm_name_depth on perm(name, depth)")
         cur.execute("create index idx_perm_type_name  on perm(type, name)")
         return True
@@ -255,8 +258,7 @@ class Permset(object):
     def pp_pattern_line(cls, patt):
         return " ".join([to_unicode(p, True) for p in patt[:-1]]) + " [%s]" % patt[-1]
 
-    @staticmethod
-    def pp_patterns(patterns):
+    def pp_patterns(self, patterns):
         lens = [len(c[3]) for c in patterns]
         if lens:
             mark_len = max(lens)
@@ -269,9 +271,22 @@ class Permset(object):
             patt = [to_unicode(p, True) for p in patt]
             type, pt, ty, mark, name, depth, s1, s2 = patt
             if type!=type_prev:
-                print(fmt % ("-", "-", "-", "-"*20, "-"*40))
+                print(fmt % ("-", "-", "-", "-"*mark_len, "-"*40))
             print(fmt % (type, pt, ty, mark, name))
             type_prev = type
+        self.pp_stats(patterns)
+
+    def pp_stats(self, patterns):
+        cur = self.con.cursor()
+        cur.execute(
+            """select count(*), type from perm
+               group by type order by 2 desc""")
+        msg = []
+        for cnt_all, type_db in cur.fetchall():
+            cnt_patt = len([1 for type, pt, ty, mark, name, depth, s1, s2 in patterns if type==type_db])
+            msg.append("%s => %s / %s = %.1lf %%" % (type_db, cnt_patt, cnt_all, cnt_patt * 100.0/cnt_all))
+        cur.close()
+        print("\nStats: %s" % " | ".join(msg))
 
     @staticmethod
     def get_perm_str(perm):
@@ -321,8 +336,56 @@ class Permset(object):
         return [c for patt in patterns for c in cls.get_apply_pattern_command(patt)]
 
     @staticmethod
-    def load_patterns_saved(output):
-        return json.load(open(output, "r", "utf-8"))
+    def load_config():
+        cfg = {}
+        if os.path.exists(PERMSET_CONFIG_FILE):
+            try:
+                cfg = json.load(open(PERMSET_CONFIG_FILE, "r", "utf-8"))
+                if not isinstance(cfg, dict):
+                    raise Exception("Configuration file should be simple dict - found %s." % 
+                                    type(cfg))
+            except Exception, ex:
+                print("Ignoring problem in %s foncif file: %s" % (
+                      PERMSET_CONFIG_FILE, ex))
+                cfg = {}
+        return cfg
+
+    @classmethod
+    def load_patterns_saved(cls, output):
+        cfg = cls.load_config()
+        patterns = json.load(open(output, "r", "utf-8"))
+        errs = []
+        patterns_new = []
+
+        def subst_var(errs, value, name):
+            if value.startswith("$"):
+                if value not in cfg:
+                    errs.append((value, "Pattern %s contains %s variable in '%s' that can't be substited" % (
+                                i+1, name, value)))
+                else:
+                    value = cfg[value]
+            return value
+
+        for i, (type, pt, ty, mark, name, depth, s1, s2) in enumerate(patterns):
+            user, group, perm = mark.split("|")
+            user  = subst_var(errs, user , "user" )
+            group = subst_var(errs, group, "group")
+            mark = "|".join((user,group,perm))
+            patterns_new.append((type, pt, ty, mark, name, depth, s1, s2))
+
+        if errs:
+            print ("Invalid patterns found in %s:\n %s" % (
+                   output, "\n ".join([e for v,e in errs])))
+            if cfg:
+                print("\nYou should add following variables to %s:\n  %s" % (
+                        PERMSET_CONFIG_FILE,
+                        "\n ".join([v for v,e in errs]),))
+            else:
+                cfg_sample = dict([(v,"fill-this") for v,e in errs])
+                print ("\nDefine patterns in %s something like this and try again:\n%s" % (
+                        PERMSET_CONFIG_FILE, json.dumps(cfg_sample, indent=2)))
+            return None
+        return patterns_new
 
     @staticmethod
     def check_before_set(patts):
@@ -380,6 +443,12 @@ Arguments:
     - when no options is set - script calculates patterns and prints them
       out.  If <dir>/.permset exists - calculated patterns and saved patterns
       are compared.
+
+Variable substitution:
+    - pattern can have variables for user or group in saved patterns. Example:
+        ,["F", "S", null, "$user|admin|rw-------", ...
+    - variables are read from json ~/.permset.config file. Example:
+        { "$user": "jo" } 
 
 Pattern codes by columns:
     1. D - directory pattern, F - files pattern
@@ -443,6 +512,8 @@ Pattern codes by columns:
     else:
         if os.path.exists(output):
             patterns_saved = permset.load_patterns_saved(output)
+            if patterns_saved is None:
+                return False
             diff = permset.get_diff(patterns, patterns_saved)
             if options.set:
                 cmds = permset.get_apply_patterns_commands(patterns_saved)

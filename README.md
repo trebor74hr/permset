@@ -6,15 +6,15 @@ on patterns.
 
 Installation
 ------------
-for admins - as a standalone script - go to some PATH visible dir and do:
+As a standalone script - go to some PATH visible dir and do:
 
     wget https://raw.github.com/trebor74hr/permset/master/permset/base.py -O permset && chmod u+x permset
 
-for developers/devops/other - as a python package using [pip](http://www.pip-installer.org/en/latest/):
+Or as a python package using [pip](http://www.pip-installer.org/en/latest/):
 
     pip install permset
 
-try it out:
+Try it out:
 
     permset
 
@@ -57,6 +57,15 @@ Options:
     -t, --set              set permissions by actual perm.setup
     -v, --verbose          verbose output
 
+### Variable substitution
+
+ Pattern can have variables for user or group in saved patterns. Example:
+
+    ,["F", "S", null, "$user|admin|rw-------", ...
+
+ Variables are read from json ~/.permset.config file. Example:
+
+    { "$user": "jo" } 
 
 Common workflow 
 ---------------
@@ -95,6 +104,8 @@ Some django project:
     - - -  -------------------- ----------------------------------------
     D P R user1|staff|rwxr-xr-x .
     D P R user1|admin|rwxr-xr-x ./sites
+
+    Stats: F => 6 / 101 = 5.9 % | D => 2 / 14 = 14.3 %
 
     Call the script with --save option to save permission patterns.
 
@@ -139,6 +150,8 @@ See details:
     D P R user1|staff|rwxr-xr-x .
     D P R user1|admin|rwxr-xr-x ./sites
 
+    Stats: F => 6 / 101 = 5.9 % | D => 2 / 14 = 14.3 %
+
     Directory's current permission patterns:
     - - -  -------------------- ----------------------------------------
     F P R user1|staff|rw-r--r-- .
@@ -151,6 +164,8 @@ See details:
     - - -  -------------------- ----------------------------------------
     D P R user1|staff|rwxr-xr-x .
     D P R user1|admin|rwxr-xr-x ./sites
+
+    Stats: F => 7 / 101 = 6.9 % | D => 2 / 14 = 14.3 %
 
     === Number of patterns differs (9!=10)
 
@@ -231,27 +246,24 @@ Licence and disclaimer in [LICENCE](https://github.com/trebor74hr/permset/blob/m
 
 Installation options
 --------------------------
-### Easiest:
-    
+
+### Option 1 - standalone script
+As a standalone script - go to some PATH visible dir and do:
+
+    wget https://raw.github.com/trebor74hr/permset/master/permset/base.py -O permset && chmod u+x permset
+
+### Option 2 - pip way
+Or as a python package using [pip](http://www.pip-installer.org/en/latest/):
+
     pip install permset
 
-### Standard python distutils
+### Option 3 - distutils way
  * download latest release from http://pypi.python.org/pypi/permset
  * unpack & go to folder
  * run: python setup.py install
-
-### Standalone script
-Download, rename and make executable (in some PATH folder, e.g. ~/bin):
-
-    wget https://raw.github.com/trebor74hr/permset/master/permset/base.py
-    mv base.py permset
-    chmod u+x permset
-
-Try:
-
-    ./permset
 
 Contact
 -------
 If you want to contact author - mail can be found in 
 [LICENCE](https://github.com/trebor74hr/permset/blob/master/LICENCE) file.
+

@@ -1,6 +1,7 @@
 TODO
     - convert to rst to match pypi and github - README.rst
-    - skip paths
+    - use it
+    - skip paths?
         - put them in global or local ignore list
         - nesting with .permset
         - skipping with: touch .permset.skip
@@ -12,3 +13,6 @@ DONE
     - push to pypi
     - publish public
     - write session example, installation and other things in readme
+    - user/group variable substitutions - prompt way - read json dict from file and subst the dirs
+    - sqlite commit at the end
+    - show nr of files/dirs and nr. of patterns found + perc.
