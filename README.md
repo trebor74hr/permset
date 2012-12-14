@@ -31,9 +31,20 @@ Requirements
 * \*nix (linux, osx, bsd, unix ...).
 * Python 2.6+ (json module used).
 
+
+Common workflow 
+---------------
+Common workflow:
+
+1. calculate permission patterns (permset), save them to root/.permset
+   (permset --save)
+2. compare current permissions with saved patterns 
+   (permset), if any difference found, apply patterns (permset --set) 
+   or overwrite existing patterns with new one (permset --save)
+
+
 Usage
 -----
-
 Usage:
 
     permset [options] [<dir>]
@@ -67,19 +78,8 @@ Options:
 
     { "$user": "jo" } 
 
-Common workflow 
----------------
-Common workflow:
 
-1. calculate permission patterns (permset), save them to root/.permset
-   (permset --save)
-2. compare current permissions with saved patterns 
-   (permset), if any difference found, apply patterns (permset --set) 
-   or overwrite existing patterns with new one (permset --save)
-
-
-Pattern codes by columns
-------------------------
+### Pattern codes by columns
 Pattern codes by columns:
 
 1. D - directory pattern, F - files pattern
