@@ -2,10 +2,10 @@ TODO
     - convert to rst to match pypi and github - README.rst
     - use it
     - skip paths?
-        - put them in global or local ignore list
-        - nesting with .permset
-        - skipping with: touch .permset.skip
-    - print out stats - how many files -> how many patterns and for dirs too
+        - if found - report warning and abort with instructions
+            - remove
+            - call with --force
+        - in --force mode - report wrn - ignore and continue
 
 DONE
     - fix algorithm for 
@@ -16,3 +16,4 @@ DONE
     - user/group variable substitutions - prompt way - read json dict from file and subst the dirs
     - sqlite commit at the end
     - show nr of files/dirs and nr. of patterns found + perc.
+    - print out stats - how many files -> how many patterns and for dirs too
